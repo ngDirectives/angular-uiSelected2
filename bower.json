@@ -1,0 +1,14 @@
+{
+  "name": "anguar-uiSelected2",
+  "authors": [
+    "nil4you <nil4u.you@gmail.com>"
+  ],
+  "description": "angular repository for uiselect2",
+  "main": "select2.js",
+  "keywords": [
+    "angular",
+    "uiselect2"
+  ],
+  "license": "MIT",
+  "homepage": ""
+}

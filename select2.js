@@ -235,16 +235,45 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
           }
         });
       }else{
-          scope.$watch(attrs.ngModel, function() {
-            if(typeof controller.$viewValue !== "undefined"){
-                $timeout(function() {
-                  $(elm).val(controller.$viewValue).trigger("change");
-                });
-            }
+          elm.select2();
+          var opts = angular.extend({}, options, scope.$eval(attrs.uiSelect2));
+          //below code is commented to check when model is updated
+          // scope.$watch(attrs.ngModel, function() {
+          //   if(typeof controller.$viewValue !== "undefined" && controller.$viewValue != null &&  controller.$viewValue != ""){
+          //       $timeout(function() {
+          //         console.log(controller.$viewValue);
+          //         console.log(attrs.id);
+          //         console.log(scope.$eval(attrs.ngModel));
+          //         $(elm).select2('data', controller.$modelValue);
+          //     //   scope.$apply(function () {
+          //     //   controller.$setViewValue(
+          //     //     convertToAngularModel(elm.select2('data')));
+          //     // });
+          //     //   });
+          //         //$(elm).val(controller.$viewValue).trigger("change");
+          //       });
+          //   }
+          // }, true);
+          if(watch){
+            scope.$watch(watch, function (newVal, oldVal, scope) {
+              if (angular.equals(newVal, oldVal)) {
+                return;
+              }
+              //console.log(newVal);
+              // Delayed so that the options have time to be rendered
+              $timeout(function () {
+                var md = $(elm).attr('ngModel')
+                elm.select2('val', controller.$viewValue).trigger("change");
+                // Refresh angular to remove the superfluous option
+                controller.$render();
+                if(newVal && !oldVal && controller.$setPristine) {
+                  controller.$setPristine(true);
+                }
+              },700);
+            });
+          }
            
-          }, true);
         }
-
       }
     }
   };

@@ -17,8 +17,8 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
         repeatAttr,
         isSelect = tElm.is('select'),
         isMultiple = angular.isDefined(tAttrs.multiple);
-
-      // Enable watching of the options dataset if in use
+        
+          // Enable watching of the options dataset if in use
       if (tElm.is('select')) {
         repeatOption = tElm.find( 'optgroup[ng-repeat], optgroup[data-ng-repeat], option[ng-repeat], option[data-ng-repeat]');
 
@@ -29,6 +29,9 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
       }
 
       return function (scope, elm, attrs, controller) {
+        if(isMultiple){
+
+
         // instance-specific options
         var opts = angular.extend({}, options, scope.$eval(attrs.uiSelect2));
 
@@ -89,6 +92,7 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
             }
             controller.$render();
           }, true);
+
           controller.$render = function () {
             if (isSelect) {
               elm.select2('val', controller.$viewValue);
@@ -230,20 +234,18 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
             elm.prev().toggleClass('ng-pristine', controller.$pristine);
           }
         });
-      };
-    },
-    link: function(scope, element, attrs,controller){
-      if (!attrs.ngMultiple) {
+      }else{
           scope.$watch(attrs.ngModel, function() {
             if(typeof controller.$viewValue !== "undefined"){
-              console.log(controller.$viewValue);
                 $timeout(function() {
-                  $(element).val(controller.$viewValue).trigger("change");
+                  $(elm).val(controller.$viewValue).trigger("change");
                 });
             }
            
           }, true);
         }
+
+      }
     }
   };
 });

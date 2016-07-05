@@ -1,10 +1,15 @@
 {
   "name": "anguar-uiSelected2",
+  "version": "0.0.1",
   "authors": [
     "nil4you <nil4u.you@gmail.com>"
   ],
   "description": "angular repository for uiselect2",
   "main": "select2.js",
+  "dependencies": {
+    "jquery": ">=2.1.2",
+    "select2": "~3.4.5"
+  },
   "keywords": [
     "angular",
     "uiselect2"

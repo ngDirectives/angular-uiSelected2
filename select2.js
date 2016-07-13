@@ -29,11 +29,48 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
       }
 
       return function (scope, elm, attrs, controller) {
-        if(isMultiple){
-
 
         // instance-specific options
         var opts = angular.extend({}, options, scope.$eval(attrs.uiSelect2));
+controller.$render = function () {
+            if (isSelect) {
+              elm.select2('val', controller.$viewValue);
+            } else {
+              if (opts.multiple) {
+                controller.$isEmpty = function (value) {
+                  return !value || value.length === 0;
+                };
+                var viewValue = controller.$viewValue;
+                if (angular.isString(viewValue)) {
+                  viewValue = viewValue.split(',');
+                }
+                elm.select2(
+                  'data', convertToSelect2Model(viewValue));
+                if (opts.sortable) {
+                  elm.select2("container").find("ul.select2-choices").sortable({
+                    containment: 'parent',
+                    start: function () {
+                      elm.select2("onSortStart");
+                    },
+                    update: function () {
+                      elm.select2("onSortEnd");
+                      elm.trigger('change');
+                    }
+                  });
+                }                  
+              } else {
+                if (angular.isObject(controller.$viewValue)) {
+                  elm.select2('data', controller.$viewValue);
+                } else if (!controller.$viewValue) {
+                  elm.select2('data', null);
+                } else {
+                  elm.select2('val', controller.$viewValue);
+                }
+              }
+            }
+          };
+
+        if(isMultiple || !isSelect){
 
         /*
         Convert from Select2 view-model to Angular view-model.
@@ -93,43 +130,7 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
             controller.$render();
           }, true);
 
-          controller.$render = function () {
-            if (isSelect) {
-              elm.select2('val', controller.$viewValue);
-            } else {
-              if (opts.multiple) {
-                controller.$isEmpty = function (value) {
-                  return !value || value.length === 0;
-                };
-                var viewValue = controller.$viewValue;
-                if (angular.isString(viewValue)) {
-                  viewValue = viewValue.split(',');
-                }
-                elm.select2(
-                  'data', convertToSelect2Model(viewValue));
-                if (opts.sortable) {
-                  elm.select2("container").find("ul.select2-choices").sortable({
-                    containment: 'parent',
-                    start: function () {
-                      elm.select2("onSortStart");
-                    },
-                    update: function () {
-                      elm.select2("onSortEnd");
-                      elm.trigger('change');
-                    }
-                  });
-                }                  
-              } else {
-                if (angular.isObject(controller.$viewValue)) {
-                  elm.select2('data', controller.$viewValue);
-                } else if (!controller.$viewValue) {
-                  elm.select2('data', null);
-                } else {
-                  elm.select2('val', controller.$viewValue);
-                }
-              }
-            }
-          };
+          
 
           // Watch the options dataset for changes
           if (watch) {
@@ -235,26 +236,31 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
           }
         });
       }else{
-          elm.select2();
-          var opts = angular.extend({}, options, scope.$eval(attrs.uiSelect2));
-          //below code is commented to check when model is updated
-          // scope.$watch(attrs.ngModel, function() {
-          //   if(typeof controller.$viewValue !== "undefined" && controller.$viewValue != null &&  controller.$viewValue != ""){
-          //       $timeout(function() {
-          //         console.log(controller.$viewValue);
-          //         console.log(attrs.id);
-          //         console.log(scope.$eval(attrs.ngModel));
-          //         $(elm).select2('data', controller.$modelValue);
-          //     //   scope.$apply(function () {
-          //     //   controller.$setViewValue(
-          //     //     convertToAngularModel(elm.select2('data')));
-          //     // });
-          //     //   });
-          //         //$(elm).val(controller.$viewValue).trigger("change");
-          //       });
-          //   }
-          // }, true);
-          if(watch){
+           // Initialize the plugin late so that the injected DOM does not disrupt the template compiler
+      elm.select2();
+
+          // Update valid and dirty statuses
+          controller.$parsers.push(function (value) {
+            var div = elm.prev();
+            div
+              .toggleClass('ng-invalid', !controller.$valid)
+              .toggleClass('ng-valid', controller.$valid)
+              .toggleClass('ng-invalid-required', !controller.$valid)
+              .toggleClass('ng-valid-required', controller.$valid)
+              .toggleClass('ng-dirty', controller.$dirty)
+              .toggleClass('ng-pristine', controller.$pristine);
+            return value;
+          });
+          // Watch the model for programmatic changes
+           scope.$watch(tAttrs.ngModel, function(current, old) {
+            if (!current) {
+              elm.select2("val","");
+            }
+            if (current === old) {
+              return;
+            }
+            elm.select2('val', controller.$viewValue);
+          }, true);
             scope.$watch(watch, function (newVal, oldVal, scope) {
               if (angular.equals(newVal, oldVal)) {
                 return;
@@ -271,7 +277,7 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
                 }
               },700);
             });
-          }
+       
            
         }
       }

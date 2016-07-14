@@ -257,7 +257,20 @@ controller.$render = function () {
               elm.select2("val","");
             }
             if (current === old) {
-              return;
+              var now = elm.select2("val");
+              if(now !== null){//if value is not nulled
+                $timeout(function(){
+                  if(now.indexOf('? ') > -1){
+                    $(elm).children('option').first().remove();
+                    elm.select2("val",current);
+                  }else{
+                    return;
+                  }
+                },300);
+              }else{//null it if value is removed
+                elm.select2("val","");
+                return;
+              }
             }
             elm.select2('val', controller.$viewValue);
           }, true);

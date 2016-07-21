@@ -240,7 +240,8 @@ controller.$render = function () {
       elm.select2();
 
           // Update valid and dirty statuses
-          controller.$parsers.push(function (value) {
+          var status = function(controller){
+            controller.$parsers.push(function (value) {
             var div = elm.prev();
             div
               .toggleClass('ng-invalid', !controller.$valid)
@@ -251,6 +252,8 @@ controller.$render = function () {
               .toggleClass('ng-pristine', controller.$pristine);
             return value;
           });
+          }
+          
           // Watch the model for programmatic changes
            scope.$watch(tAttrs.ngModel, function(current, old) {
             if (!current) {
@@ -263,12 +266,14 @@ controller.$render = function () {
                   if(now.indexOf('? ') > -1){
                     $(elm).children('option').first().remove();
                     elm.select2("val",current);
+                    status(controller);
                   }else{
                     return;
                   }
                 },300);
               }else{//null it if value is removed
                 elm.select2("val","");
+                status(controller);
                 return;
               }
             }
@@ -285,6 +290,7 @@ controller.$render = function () {
                 elm.select2('val', controller.$viewValue).trigger("change");
                 // Refresh angular to remove the superfluous option
                 controller.$render();
+                status(controller);
                 if(newVal && !oldVal && controller.$setPristine) {
                   controller.$setPristine(true);
                 }

@@ -237,8 +237,7 @@ controller.$render = function () {
         });
       }else{
            // Initialize the plugin late so that the injected DOM does not disrupt the template compiler
-      elm.select2();
-
+          (tAttrs.uiSelect2!== null)?elm.select2({ allowClear: true}):elm.select2();
           // Update valid and dirty statuses
           var status = function(controller){
             controller.$parsers.push(function (value) {

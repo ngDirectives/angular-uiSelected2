@@ -237,7 +237,7 @@ controller.$render = function () {
         });
       }else{
            // Initialize the plugin late so that the injected DOM does not disrupt the template compiler
-          (tAttrs.uiSelect2!== null)?elm.select2({ allowClear: true}):elm.select2();
+          (tAttrs.uiSelect2)?(elm.select2({ allowClear: true})):elm.select2();
           // Update valid and dirty statuses
           var status = function(controller){
             controller.$parsers.push(function (value) {
@@ -256,20 +256,26 @@ controller.$render = function () {
           // Watch the model for programmatic changes
            scope.$watch(tAttrs.ngModel, function(current, old) {
             if (!current) {
-              elm.select2("val","");
+              var now = elm.select2("val");
+                $timeout(function(){
+                  var vals = $(elm).children('option').first().val();
+                  if(vals.indexOf('? ') > -1){
+                    $(elm).children('option').first().remove();
+                  }
+                  elm.select2("val","");
+               },400);
             }
             if (current === old) {
               var now = elm.select2("val");
               if(now !== null){//if value is not nulled
                 $timeout(function(){
-                  if(now.indexOf('? ') > -1){
-                    $(elm).children('option').first().remove();
+                  var vals = $(elm).children('option').first().val();
+                  if(vals.indexOf('? ') > -1){
                     elm.select2("val",current);
-                    status(controller);
                   }else{
                     return;
                   }
-                },300);
+                },400);
               }else{//null it if value is removed
                 elm.select2("val","");
                 status(controller);
@@ -293,7 +299,7 @@ controller.$render = function () {
                 if(newVal && !oldVal && controller.$setPristine) {
                   controller.$setPristine(true);
                 }
-              },700);
+              },400);
             });
        
            

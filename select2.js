@@ -307,7 +307,9 @@ controller.$render = function () {
               // Delayed so that the options have time to be rendered
               $timeout(function () {
                   var md = $(elm).attr('ngModel');
-
+                  if($.isNumeric( controller.$viewValue )){
+                    controller.$viewValue=controller.$viewValue.toString();
+                  }
                   $(elm).select2('val', controller.$viewValue).trigger("change");
                   // Refresh angular to remove the superfluous option
                   controller.$render();

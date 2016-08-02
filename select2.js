@@ -30,13 +30,15 @@ angular.module("uiselected2", []).directive("uiSelect2", function ($timeout) {
 
       return function (scope, elm, attrs, controller) {
         var checknull = function(el){
-          var e = $(el);
-          var vals = e.children('option').first().val();
-          if(vals.indexOf('? ') > -1){
-            e.children('option').first().remove();
-            return true;
-          }
-          return false;
+           var e = $(el);
+            if(e.children('option').length){
+              var vals = e.children('option').first().val();
+              if(vals.indexOf('? ') > -1){
+                e.children('option').first().remove();
+                return true;
+              }
+              return false;
+            }
         }
 
         // instance-specific options
@@ -250,16 +252,16 @@ controller.$render = function () {
           // Update valid and dirty statuses
           var status = function(controller){
             controller.$parsers.push(function (value) {
-              var div = elm.prev();
-              div
-                .toggleClass('ng-invalid', !controller.$valid)
-                .toggleClass('ng-valid', controller.$valid)
-                .toggleClass('ng-invalid-required', !controller.$valid)
-                .toggleClass('ng-valid-required', controller.$valid)
-                .toggleClass('ng-dirty', controller.$dirty)
-                .toggleClass('ng-pristine', controller.$pristine);
-              return value;
-            });
+            var div = elm.prev();
+            div
+              .toggleClass('ng-invalid', !controller.$valid)
+              .toggleClass('ng-valid', controller.$valid)
+              .toggleClass('ng-invalid-required', !controller.$valid)
+              .toggleClass('ng-valid-required', controller.$valid)
+              .toggleClass('ng-dirty', controller.$dirty)
+              .toggleClass('ng-pristine', controller.$pristine);
+            return value;
+          });
           }
           
           // Watch the model for programmatic changes
@@ -267,31 +269,32 @@ controller.$render = function () {
             if (!current) {
                   $timeout(function(){
                     checknull(elm);
-                 },400);
                   elm.select2("val","");
+                 },400);
+                  
             }
             if (current === old) {
               var now = elm.select2("val");
               if(now !== null){//if value is not nulled
                 $timeout(function(){
                   if(checknull(elm)){
-                    $(elm).select2("val",current).trigger("change");
+                    $(elm).select2("val",current);
                   }else{
                     return;
                   }
                 },400);
               }else{//null it if value is removed
                 $timeout(function(){
-              $(elm).select2().trigger("change")
-            });
-                status(controller);
+                  elm.select2("val","");
+                  status(controller);
+                });
+                
                 return;
               }
             }
-            $(elm).select2('val', controller.$viewValue);
             $timeout(function(){
-              $(elm).select2().trigger("change")
-            });
+              $(elm).select2('val', controller.$viewValue);
+            },500);
           }, true);
             scope.$watch(watch, function (newVal, oldVal, scope) {
               if (angular.equals(newVal, oldVal)) {
@@ -303,23 +306,22 @@ controller.$render = function () {
               //console.log(newVal);
               // Delayed so that the options have time to be rendered
               $timeout(function () {
-                var md = $(elm).attr('ngModel');
+                  var md = $(elm).attr('ngModel');
 
-                $(elm).select2('val', controller.$viewValue).trigger("change");
-                // Refresh angular to remove the superfluous option
-                controller.$render();
-                status(controller);
-                if(newVal && !oldVal && controller.$setPristine) {
-                  controller.$setPristine(true);
-                }
-                $timeout(function () {
-                  checknull(elm);  
+                  $(elm).select2('val', controller.$viewValue).trigger("change");
+                  // Refresh angular to remove the superfluous option
+                  controller.$render();
+                  status(controller);
+                  if(newVal && !oldVal && controller.$setPristine) {
+                    controller.$setPristine(true);
+                  }
+                  $timeout(function () {
+                    checknull(elm);  
+                  },400);
                 },400);
-                },400);
-              $timeout(function(){
-                $(elm).select2().trigger("change")
-              });
             });
+       
+           
         }
       }
     }

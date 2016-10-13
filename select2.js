@@ -157,7 +157,7 @@ controller.$render = function () {
                 if(newVal && !oldVal && controller.$setPristine) {
                   controller.$setPristine(true);
                 }
-              });
+              },800);
             });
           }
 
